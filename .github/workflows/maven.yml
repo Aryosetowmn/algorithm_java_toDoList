@@ -25,5 +25,5 @@ jobs:
         run: mvn clean install
 
       - name: Run Testing
-        run: mvn teste.
+        run: mvn test.
 ---
