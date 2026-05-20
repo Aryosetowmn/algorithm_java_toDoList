@@ -1,39 +1,38 @@
-package com.example.todo;
+name: security
 
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+on:
+  push:
+    branches: ["main", "master"]
+  pull_request:
+  schedule:
+    - cron: '0 3 * * 1'
 
-class TodoListTest {
-    @Test
-    void testAddTask() {
-        TodoList list = new TodoList();
-        list.addTask("Belajar Git");
-        assertEquals(1, list.getTasks().size());
-        assertEquals("Belajar Git", list.getTasks().get(0).getDescription());
-    }
+permissions:
+  actions: read
+  contents: read
+  security-events: write
 
-    @Test
-    void testCompleteTask() {
-        TodoList list = new TodoList();
-        list.addTask("Push ke GitHub");
-        boolean done = list.completeTask(0);
-        assertTrue(done, "Task harus dapat diselesaikan");
-        assertTrue(list.getTasks().get(0).isDone());
-    }
+jobs:
+  codeql:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    @Test
-    void testRemoveTask() {
-        TodoList list = new TodoList();
-        list.addTask("Pull request");
-        boolean removed = list.removeTask(0);
-        assertTrue(removed, "Task harus terhapus");
-        assertEquals(0, list.getTasks().size());
-    }
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
 
-    @Test
-    void testRemoveInvalidTask() {
-        TodoList list = new TodoList();
-        boolean removed = list.removeTask(0);
-        assertFalse(removed, "Tidak ada task, remove harus gagal");
-    }
-}
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: java-kotlin
+
+      - name: Build with Maven
+        run: mvn -B -DskipTests compile
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
