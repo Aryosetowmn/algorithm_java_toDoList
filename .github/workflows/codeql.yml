@@ -1,16 +1,13 @@
-## YAML Template.name: "CodeQL"
+name: "CodeQL"
 
 on:
   push:
     branches: [ "main" ]
-
   pull_request:
     branches: [ "main" ]
 
 jobs:
-
   analyze:
-
     name: Analyze
     runs-on: ubuntu-latest
 
@@ -21,19 +18,12 @@ jobs:
 
     strategy:
       fail-fast: false
-
       matrix:
-        language: [ 'java-kotlin' ]
+        language: [ 'java' ]  # Pakai 'java' saja jika tidak pakai kotlin
 
     steps:
-
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: ${{ matrix.language }}
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -41,9 +31,13 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
+
       - name: Build Maven Project
         run: mvn clean install
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
----
+        uses: github/codeql-action/analyze@v4
